@@ -1,15 +1,17 @@
 package ru.academits.alekseev.phonebookservletapi.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Contact {
     private int id;
     private String surname;
     private String name;
     private String phone;
 
-    public Contact() {
-    }
-
-    public Contact(int id, String surname, String name, String phone) {
+    @JsonCreator
+    public Contact(@JsonProperty("id") int id, @JsonProperty("surname") String surname,
+                   @JsonProperty("name") String name, @JsonProperty("phone") String phone) {
         this.id = id;
         this.surname = surname;
         this.name = name;

@@ -17,11 +17,12 @@ public class ContactInMemoryRepository implements ContactRepository {
     }
 
     @Override
-    public Contact create(String surname, String name, String phone) {
+    public void create(Contact contact) {
         synchronized (contacts) {
-            Contact contact = new Contact(currentId.getAndIncrement(), surname, name, phone);
+            int newId = currentId.getAndIncrement();
+            contact.setId(newId);
+
             contacts.add(contact);
-            return contact;
         }
     }
 

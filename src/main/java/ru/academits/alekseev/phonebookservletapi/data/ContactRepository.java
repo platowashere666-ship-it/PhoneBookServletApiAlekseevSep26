@@ -5,7 +5,7 @@ import java.util.List;
 public interface ContactRepository {
     List<Contact> getAll();
 
-    Contact create(String surname, String name, String phone);
+    void create(Contact contact);
 
     void update(Contact contact);
 
