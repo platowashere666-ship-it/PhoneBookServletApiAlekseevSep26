@@ -14,9 +14,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.Serial;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet(urlPatterns = {"/api/contacts", "/api/contacts/*"})
 public class ContactServlet extends HttpServlet {
@@ -45,41 +43,35 @@ public class ContactServlet extends HttpServlet {
     private void writeSuccess(HttpServletResponse resp, int status, String message) throws IOException {
         resp.setStatus(status);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", true);
-        body.put("message", message);
-
+        ResponseBody body = new ResponseBody(message, true);
         mapper.writeValue(resp.getWriter(), body);
     }
 
     private void writeError(HttpServletResponse resp, String message) throws IOException {
         resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("success", false);
-        body.put("message", message);
-
+        ResponseBody body = new ResponseBody(message, false);
         mapper.writeValue(resp.getWriter(), body);
     }
 
-    private boolean hasErrors(HttpServletResponse resp, Contact contact) throws IOException {
+    private boolean checkForErrors(HttpServletResponse resp, Contact contact) throws IOException {
         if (contact == null) {
             writeError(resp, "Error: contact is null");
             return true;
         }
 
-        if (contact.getSurname().isBlank()) {
-            writeError(resp, "Error: surname is empty");
+        if (contact.getSurname().isBlank() || contact.getSurname() == null) {
+            writeError(resp, "Error: surname is empty or null");
             return true;
         }
 
-        if (contact.getName().isBlank()) {
-            writeError(resp, "Error: name is empty");
+        if (contact.getName().isBlank() || contact.getName() == null) {
+            writeError(resp, "Error: name is empty  or null");
             return true;
         }
 
-        if (contact.getPhone().isBlank()) {
-            writeError(resp, "Error: phone is empty");
+        if (contact.getPhone().isBlank() || contact.getPhone() == null) {
+            writeError(resp, "Error: phone is empty or null");
             return true;
         }
 
@@ -108,7 +100,7 @@ public class ContactServlet extends HttpServlet {
 
         Contact contact = mapper.readValue(req.getReader(), Contact.class);
 
-        if (hasErrors(resp, contact)) {
+        if (checkForErrors(resp, contact)) {
             return;
         }
 
@@ -134,7 +126,7 @@ public class ContactServlet extends HttpServlet {
 
         Contact contact = mapper.readValue(req.getReader(), Contact.class);
 
-        if (hasErrors(resp, contact)) {
+        if (checkForErrors(resp, contact)) {
             return;
         }
 
@@ -160,6 +152,6 @@ public class ContactServlet extends HttpServlet {
         ContactRepository contactRepository = new ContactInMemoryRepository();
         contactRepository.delete(id);
 
-        writeSuccess(resp, HttpServletResponse.SC_NO_CONTENT, "Contact deleted successfully");
+        writeSuccess(resp, HttpServletResponse.SC_OK, "Contact deleted successfully");
     }
 }
