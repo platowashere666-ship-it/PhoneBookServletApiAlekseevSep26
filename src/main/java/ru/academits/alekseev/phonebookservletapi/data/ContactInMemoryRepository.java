@@ -54,8 +54,8 @@ public class ContactInMemoryRepository implements ContactRepository {
     @Override
     public List<Contact> search(String query) {
         synchronized (contacts) {
-            if (query.isBlank()) {
-                return contacts;
+            if (query == null || query.isBlank()) {
+                return new ArrayList<>(contacts);
             }
 
             String searchText = query.toLowerCase().trim();

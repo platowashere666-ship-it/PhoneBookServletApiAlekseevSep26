@@ -10,6 +10,7 @@ import ru.academits.alekseev.phonebookservletapi.data.Contact;
 import ru.academits.alekseev.phonebookservletapi.data.ContactInMemoryRepository;
 import ru.academits.alekseev.phonebookservletapi.data.ContactRepository;
 
+import ru.academits.alekseev.phonebookservletapi.data.ResponseBody;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -54,23 +55,23 @@ public class ContactServlet extends HttpServlet {
         mapper.writeValue(resp.getWriter(), body);
     }
 
-    private boolean checkForErrors(HttpServletResponse resp, Contact contact) throws IOException {
+    private boolean validateContact(HttpServletResponse resp, Contact contact) throws IOException {
         if (contact == null) {
             writeError(resp, "Error: contact is null");
             return true;
         }
 
-        if (contact.getSurname().isBlank() || contact.getSurname() == null) {
+        if (contact.getSurname() == null || contact.getSurname().isBlank()) {
             writeError(resp, "Error: surname is empty or null");
             return true;
         }
 
-        if (contact.getName().isBlank() || contact.getName() == null) {
-            writeError(resp, "Error: name is empty  or null");
+        if (contact.getName() == null || contact.getName().isBlank()) {
+            writeError(resp, "Error: name is empty or null");
             return true;
         }
 
-        if (contact.getPhone().isBlank() || contact.getPhone() == null) {
+        if (contact.getPhone() == null || contact.getPhone().isBlank()) {
             writeError(resp, "Error: phone is empty or null");
             return true;
         }
@@ -100,7 +101,7 @@ public class ContactServlet extends HttpServlet {
 
         Contact contact = mapper.readValue(req.getReader(), Contact.class);
 
-        if (checkForErrors(resp, contact)) {
+        if (validateContact(resp, contact)) {
             return;
         }
 
@@ -126,16 +127,20 @@ public class ContactServlet extends HttpServlet {
 
         Contact contact = mapper.readValue(req.getReader(), Contact.class);
 
-        if (checkForErrors(resp, contact)) {
+        if (validateContact(resp, contact)) {
             return;
         }
 
         contact.setId(id);
 
         ContactRepository contactRepository = new ContactInMemoryRepository();
-        contactRepository.update(contact);
 
-        writeSuccess(resp, HttpServletResponse.SC_OK, "Contact updated successfully");
+        try {
+            contactRepository.update(contact);
+            writeSuccess(resp, HttpServletResponse.SC_OK, "Contact updated successfully");
+        } catch (IllegalArgumentException e) {
+            writeError(resp, e.getMessage());
+        }
     }
 
     @Override
