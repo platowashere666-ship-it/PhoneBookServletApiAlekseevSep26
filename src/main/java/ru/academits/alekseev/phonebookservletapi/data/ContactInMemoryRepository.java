@@ -12,7 +12,7 @@ public class ContactInMemoryRepository implements ContactRepository {
     @Override
     public List<Contact> getAll() {
         synchronized (contacts) {
-            return contacts;
+            return new ArrayList<>(contacts);
         }
     }
 
@@ -20,9 +20,8 @@ public class ContactInMemoryRepository implements ContactRepository {
     public void create(Contact contact) {
         synchronized (contacts) {
             int newId = currentId.getAndIncrement();
-            contact.setId(newId);
 
-            contacts.add(contact);
+            contacts.add(new Contact(newId, contact.getSurname(), contact.getName(), contact.getPhone()));
         }
     }
 
@@ -65,7 +64,8 @@ public class ContactInMemoryRepository implements ContactRepository {
                             (c.getSurname().toLowerCase().contains(searchText)) ||
                                     (c.getName().toLowerCase().contains(searchText)) ||
                                     (c.getPhone().toLowerCase().contains(searchText)))
-                    .collect(Collectors.toList());
+                    .map(c -> new Contact(c.getId(), c.getSurname(), c.getName(), c.getPhone()))
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
     }
 }
