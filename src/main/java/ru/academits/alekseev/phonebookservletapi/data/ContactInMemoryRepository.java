@@ -12,7 +12,9 @@ public class ContactInMemoryRepository implements ContactRepository {
     @Override
     public List<Contact> getAll() {
         synchronized (contacts) {
-            return new ArrayList<>(contacts);
+            return contacts.stream()
+                    .map(contact -> new Contact(contact.getId(), contact.getSurname(), contact.getName(), contact.getPhone()))
+                    .toList();
         }
     }
 
@@ -54,7 +56,7 @@ public class ContactInMemoryRepository implements ContactRepository {
     public List<Contact> search(String query) {
         synchronized (contacts) {
             if (query == null || query.isBlank()) {
-                return new ArrayList<>(contacts);
+                return getAll();
             }
 
             String searchText = query.toLowerCase().trim();
